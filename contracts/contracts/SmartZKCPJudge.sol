@@ -5,8 +5,9 @@ import "./ISmartZKCPJudge.sol";
 import "./Config.sol";
 import "./ReentrancyGuard.sol";
 import "./Groth16Core.sol";
+import "./Events.sol";
 
-contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config {
+contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
 
     address public factory; // factory
 
@@ -39,14 +40,13 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config {
         factory = msg.sender;
         buyer = _buyer;
         seller = _seller;
-        price = _seller;
+        price = _price;
 
         // initialize contract status
         status = ExchangeStatus.uninitialized;
     }
 
     /// @notice Buyer initialize the contract
-    /// @param
     function initialize() payable nonReentrant external {
         require(msg.sender == buyer, "SmartZKCP: invalid initializer.");
         require(status == ExchangeStatus.uninitialized, "SmartZKCP: invalid contract status.");
@@ -61,7 +61,6 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config {
     }
 
     /// @notice
-    /// @param
     function verify(bytes calldata proof, bytes32 k) nonReentrant external {
         require(msg.sender == seller, "SmartZKCP: invalid verify invoker.");
         require(status == ExchangeStatus.initialized, "SmartZKCP: invalid contract status.");
@@ -71,7 +70,7 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config {
         bool success = Groth16Core.verify();
         if(success) {
             // transfer payment to seller
-            seller.transfer(price);
+            payable(seller).transfer(price);
             // update contract state
             status = ExchangeStatus.finished;
 
@@ -83,14 +82,13 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config {
     }
 
     /// @notice Contract refunds buyer if the exchange expired without valid proof
-    /// @param
     function refund() nonReentrant external {
         require(msg.sender == buyer, "SmartZKCP: invalid refund invoker.");
         require(status == ExchangeStatus.initialized, "SmartZKCP: invalid contract status.");
         t2 = block.timestamp;
         require(t2 > t0 + LIMIT_TIME_TAU, "SmartZKCP: invalid refund operation.");
         // refund buyer
-        buyer.transfer(price);
+        payable(buyer).transfer(price);
         // update contract state
         status = ExchangeStatus.expired;
 

@@ -6,7 +6,7 @@ contract Events {
 
     event Initialized(uint256 t0);
 
-    event VerifySuccess(uint256 t1, bytes memory proof, bytes32 k);
+    event VerifySuccess(uint256 t1, bytes proof, bytes32 k);
 
     event VerifyFail(uint256 t1);
 
