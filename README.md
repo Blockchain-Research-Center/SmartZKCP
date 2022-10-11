@@ -1,2 +1,2 @@
-# zkcp-
-Source code for paper
+# SmartZKCP
+Source code for paper SmartZKCP
