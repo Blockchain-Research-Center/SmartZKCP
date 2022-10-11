@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./ISmartZKCPJudge.sol";
 import "./Config.sol";
-import "./ReentrancyGuard.sol";
+import "./utils/ReentrancyGuard.sol";
 import "./Groth16Core.sol";
 import "./Events.sol";
 
@@ -31,12 +31,15 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
         expired
     }
 
-    /// @notice
-    /// @param
-    constructor(address _seller, address _buyer, uint256 _price) {
+    constructor() {
+        factory = msg.sender;
+    }
+
+    /// @notice Factory initialize the contract
+    function initialize(address _seller, address _buyer, uint256 _price) external {
+        require(msg.sender == factory, 'SmartZKCP: only SmartZKCPFactory can initialize the contract');
         require(_seller != address(0), "SmartZKCP: invalid address.");
         require(_buyer != address(0), "SmartZKCP: invalid address.");
-
         factory = msg.sender;
         buyer = _buyer;
         seller = _seller;
@@ -46,8 +49,8 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
         status = ExchangeStatus.uninitialized;
     }
 
-    /// @notice Buyer initialize the contract
-    function initialize() payable nonReentrant external {
+    /// @notice Buyer initially start the exchange procedure
+    function init() payable nonReentrant external {
         require(msg.sender == buyer, "SmartZKCP: invalid initializer.");
         require(status == ExchangeStatus.uninitialized, "SmartZKCP: invalid contract status.");
         require(msg.value >= price, "SmartZKCP: payment not enough.");
@@ -57,10 +60,10 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
         // update contract state
         status = ExchangeStatus.initialized;
 
-        emit Initialized(t0);
+        emit ExchangeInit(t0);
     }
 
-    /// @notice
+    /// @notice Seller handout the proof and other information to verify
     function verify(bytes calldata proof, bytes32 k) nonReentrant external {
         require(msg.sender == seller, "SmartZKCP: invalid verify invoker.");
         require(status == ExchangeStatus.initialized, "SmartZKCP: invalid contract status.");
@@ -74,11 +77,11 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
             // update contract state
             status = ExchangeStatus.finished;
 
-            emit VerifySuccess(t1, proof, k);
+            emit ExchangeVerifySuccess(t1, proof, k);
             return;
         }
 
-        emit VerifyFail(t1);
+        emit ExchangeVerifyFail(t1);
     }
 
     /// @notice Contract refunds buyer if the exchange expired without valid proof
@@ -92,6 +95,6 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
         // update contract state
         status = ExchangeStatus.expired;
 
-        emit Refunded(t2);
+        emit ExchangeRefund(t2);
     }
 }
