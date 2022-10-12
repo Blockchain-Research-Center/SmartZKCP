@@ -16,12 +16,16 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
     address public buyer; // buyer
     uint256 public price; // price
 
+    // @notice variables set by the buyer
+    bytes32 public hashZ;
+
     // @notice timestamps
     uint256 public t0;
     uint256 public t1;
     uint256 public t2;
 
-    ExchangeStatus public status; // status of the exchange
+    // @notice status of the exchange
+    ExchangeStatus public status;
 
     /// @notice Contract statuses
     enum ExchangeStatus {
@@ -50,17 +54,19 @@ contract SmartZKCPJudge is ISmartZKCPJudge, ReentrancyGuard, Config, Events {
     }
 
     /// @notice Buyer initially start the exchange procedure
-    function init() payable nonReentrant external {
+    function init(bytes32 _hashZ) payable nonReentrant external {
         require(msg.sender == buyer, "SmartZKCP: invalid initializer.");
         require(status == ExchangeStatus.uninitialized, "SmartZKCP: invalid contract status.");
         require(msg.value >= price, "SmartZKCP: payment not enough.");
 
+        // set Hash of Z
+        hashZ = _hashZ;
         // set initialize timestamp
         t0 = block.timestamp;
         // update contract state
         status = ExchangeStatus.initialized;
 
-        emit ExchangeInit(t0);
+        emit ExchangeInit(t0, _hashZ);
     }
 
     /// @notice Seller handout the proof and other information to verify
