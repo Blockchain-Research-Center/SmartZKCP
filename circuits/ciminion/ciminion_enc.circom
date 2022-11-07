@@ -10,8 +10,7 @@ template CiminionEnc(nPairs) {
 
     signal input MK_0;
     signal input MK_1;
-    signal input nonce;
-    signal input IV;
+
 
     signal input PT[nPairs*2];
     signal output CT[nPairs*2];
@@ -20,14 +19,14 @@ template CiminionEnc(nPairs) {
 
     component key_schedule = KeySchedule(nSubKeys);
 
-    key_schedule.s0 <== IV; 
+    key_schedule.s0 <== 0; 
     key_schedule.s1 <== MK_0;
     key_schedule.s2 <== MK_1;
 
     // first permutation pN
     
     component p_n = IteratedPermutationN();
-    p_n.a0 <== nonce;
+    p_n.a0 <== 0;
     p_n.b0 <== key_schedule.keys[1];
     p_n.c0 <== key_schedule.keys[2];
 
@@ -65,4 +64,4 @@ template CiminionEnc(nPairs) {
     }
 }
 
-//component main = CiminionEnc(2);
+//component main = CiminionEnc(50);

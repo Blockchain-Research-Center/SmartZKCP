@@ -206,3 +206,5 @@ template Poseidon(nInputs) {
     }
     out <== pEx.out[0];
 }
+
+//component main = Poseidon(16);

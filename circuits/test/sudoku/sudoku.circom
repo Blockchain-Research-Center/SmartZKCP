@@ -40,13 +40,10 @@ template ContainsAll(SIZE) {
 }
 
 template Check(SIZE, SUBSIZE) {
-  signal input unsolved_grid[SIZE][SIZE];
+
   signal input solved_grid[SIZE][SIZE];
 
-  component range_checkers[SIZE][SIZE][2];
-  component is_solution[SIZE][SIZE];
-  component is_equal[SIZE][SIZE];
-  component is_valid[SIZE][SIZE];
+  component range_checkers[SIZE][SIZE];
   component row_checkers[SIZE];
   component col_checkers[SIZE];
   component submat_checkers[SIZE];
@@ -55,37 +52,17 @@ template Check(SIZE, SUBSIZE) {
     col_checkers[i] = ContainsAll(SIZE);
     submat_checkers[i] = ContainsAll(SIZE);
     for (var j = 0;j < SIZE;j++) {
-      for (var k = 0;k < 2;k++) {
-        range_checkers[i][j][k] = InRange(4);
-      }
-
-      is_solution[i][j] = IsZero();
-      is_equal[i][j] = IsEqual();
-      is_valid[i][j] = OR();
+      range_checkers[i][j] = InRange(4);
     }
   }
 
   // Assert input grids are valid and solved grid matches unsolved grid
   for (var i = 0;i < SIZE;i++) {
     for (var j = 0;j < SIZE;j++) {
-      range_checkers[i][j][0].value <== solved_grid[i][j];
-      range_checkers[i][j][0].upper <== SIZE;
-      range_checkers[i][j][0].lower <== 1;
-      range_checkers[i][j][0].out === 1;
-
-      range_checkers[i][j][1].value <== unsolved_grid[i][j];
-      range_checkers[i][j][1].upper <== SIZE;
-      range_checkers[i][j][1].lower <== 0;
-      range_checkers[i][j][1].out === 1;
-
-      is_solution[i][j].in <== unsolved_grid[i][j];
-
-      is_equal[i][j].in[0] <== solved_grid[i][j];
-      is_equal[i][j].in[1] <== unsolved_grid[i][j];
-
-      is_valid[i][j].a <== is_equal[i][j].out;
-      is_valid[i][j].b <== is_solution[i][j].out;
-      is_valid[i][j].out === 1;
+      range_checkers[i][j].value <== solved_grid[i][j];
+      range_checkers[i][j].upper <== SIZE;
+      range_checkers[i][j].lower <== 1;
+      range_checkers[i][j].out === 1;
     }
   }
 

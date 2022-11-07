@@ -21,14 +21,9 @@ template top() {
         } else {
             solution[i] = puzzl[i];
         }
+        sudoku.solved_grid[i\16][i%16] <== solution[i];
     }
 
-    for (var i = 0; i < 16; i++) {
-        for (var j = 0; j < 16; j++) {
-            sudoku.solved_grid[i][j] <== solution[i*16+j];
-        }
-    }
-    
     component hash = Enc(70);
     hash.MK_0 <== MK_0;
     hash.MK_1 <== MK_1;

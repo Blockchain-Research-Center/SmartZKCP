@@ -137,4 +137,4 @@ template MultiMiMC7(nInputs, nRounds) {
     out <== r[nInputs];
 }
 
-//component main = MiMC7(91);
+component main = MultiMiMC7(100, 82);
