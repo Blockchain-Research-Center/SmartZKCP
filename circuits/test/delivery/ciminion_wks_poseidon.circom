@@ -52,4 +52,4 @@ template Enc(nPairs) {
     }
 }
 
-component main {public [Keys]} = CiminionEnc(50);
+component main {public [Keys]} = CiminionEnc(500);

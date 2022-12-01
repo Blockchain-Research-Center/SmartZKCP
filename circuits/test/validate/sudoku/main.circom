@@ -1,11 +1,10 @@
 pragma circom 2.0.8;
 
-include "../ciminion-poseidon-128/ciminion-poseidon-128.circom";
+include "../../delivery/hadesmimc_poseidon.circom";
 include "sudoku.circom";
 
 template top() {
-    signal input MK_0;
-    signal input MK_1;
+    signal input Keys[16];
     signal input H;
     signal input S[140];
 
@@ -24,15 +23,17 @@ template top() {
         sudoku.solved_grid[i\16][i%16] <== solution[i];
     }
 
-    component hash = Enc(70);
-    hash.MK_0 <== MK_0;
-    hash.MK_1 <== MK_1;
+    component hash = Enc(140);
 
-    for (var i = 0; i < 140; i++){
-        hash.in[i] <== solution[i];
+    for (var i = 0; i < 16; i++){
+        hash.Keys[i] <== Keys[i];
     }
 
-    H === hash.out;
+    for (var i = 0; i < 140; i++){
+        hash.PT[i] <== solution[i];
+    }
+
+    H === hash.Out;
 }
 
-component main = top();
+component main {public [Keys]} = top();

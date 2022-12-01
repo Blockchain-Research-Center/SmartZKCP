@@ -52,4 +52,4 @@ template Enc(n) {
     }
 }
 
-component main {public [Keys]} = Enc(100);
+//component main {public [Keys]} = Enc(10000);
